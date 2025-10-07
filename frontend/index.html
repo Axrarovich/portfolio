@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniApp - Mahsulotlar</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+<header>
+    <h1>Mobis</h1>
+    <img src="logo/mobis_logo.jpg" alt="Logo" class="logo">
+</header>
+
+<main>
+    <section id="search">
+        <input type="text" id="searchInput" placeholder="Mahsulot qidirish...">
+        <select id="categoryFilter">
+            <option value="">Barchasi</option>
+        </select>
+    </section>
+
+    <section id="productList"></section>
+
+    <section id="cart">
+        <h2>Savat</h2>
+        <div id="cartItems"></div>
+        <button id="orderBtn" style="display:none;">Buyurtma berish</button>
+    </section>
+
+    <section id="addProduct">
+        <h2>Yangi mahsulot qo'shish</h2>
+        <input type="text" id="newName" placeholder="Mahsulot nomi">
+        <input type="number" id="newPrice" placeholder="Narxi">
+
+        <div class="category-wrapper">
+            <input type="text" id="newCategory" placeholder="Kategoriya tanlash" readonly>
+            <button id="addCategoryBtn">+</button>
+            <ul id="categoryList" class="category-list"></ul>
+        </div>
+
+        <input type="text" id="newInfo" placeholder="Mahsulot haqida">
+        <button id="addBtn">Qo'shish</button>
+    </section>
+
+    <section id="connectTelegramSection">
+        <a id="connectTelegram" class="btn" target="_blank">Telegram bilan bog'lash</a>
+    </section>
+
+    <!-- Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <h3>Yangi kategoriya qo'shish</h3>
+            <input type="text" id="newCategoryName" placeholder="Kategoriya nomi">
+            <div>
+                <button id="saveCategoryBtn">Saqlash</button>
+                <button id="cancelCategoryBtn">Bekor qilish</button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="scripts/app.js"></script>
+</body>
+</html>
