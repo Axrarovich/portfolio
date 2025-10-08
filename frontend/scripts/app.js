@@ -12,15 +12,24 @@ const newName = document.getElementById("newName");
 const newPrice = document.getElementById("newPrice");
 const newCategoryInput = document.getElementById("newCategory");
 const newInfo = document.getElementById("newInfo");
+const newImageFile = document.getElementById("newImageFile");
 const addBtn = document.getElementById("addBtn");
 
 // Kategoriya modal elementlari
 const categoryList = document.getElementById("categoryList");
-const addCategoryBtn = document.getElementById("addCategoryBtn");
 const categoryModal = document.getElementById("categoryModal");
 const saveCategoryBtn = document.getElementById("saveCategoryBtn");
 const cancelCategoryBtn = document.getElementById("cancelCategoryBtn");
 const newCategoryName = document.getElementById("newCategoryName");
+
+// Mahsulot modal elementlari
+const productModal = document.getElementById("productModal");
+const pmImage = document.getElementById("pmImage");
+const pmName = document.getElementById("pmName");
+const pmInfo = document.getElementById("pmInfo");
+const pmPrice = document.getElementById("pmPrice");
+const pmCategory = document.getElementById("pmCategory");
+const pmClose = document.getElementById("pmClose");
 
 // ======= FETCH PRODUCTS =======
 async function fetchProducts() {
@@ -44,14 +53,18 @@ function renderProducts() {
     ).forEach(p => {
         const div = document.createElement("div");
         div.className = "product";
+        div.onclick = () => openProductWindow(p.id);
         div.innerHTML = `
-            <h3>${p.name}</h3>
-            <p>${p.info}</p>
-            <p>$${p.price}</p>
-            <p>Kategoriya: ${p.category}</p>
-            <button onclick="updateCart(${p.id}, 'remove')">-</button>
-            <span>${p.quantity}</span>
-            <button onclick="updateCart(${p.id}, 'add')">+</button>
+            <img class="thumb" src="${p.image || 'https://via.placeholder.com/100?text=No+Image'}" alt="${p.name}" />
+            <div class="content">
+                <div class="pi-name">${p.name}</div>
+                <div class="pi-price">$${p.price}</div>
+                <div class="product-info-row">
+                    <span class="pi-cat">${p.category}</span>
+                    <span class="pi-info">${p.info || ''}</span>
+                </div>
+            </div>
+            <div class="arrow">›</div>
         `;
         productList.appendChild(div);
     });
@@ -62,11 +75,11 @@ function renderProducts() {
 function renderCategories() {
     categoryFilter.innerHTML = `<option value="">Barchasi</option>`;
     categoryList.innerHTML = "";
+
     categories.forEach(c => {
         // filter selectga qo'shish
         categoryFilter.innerHTML += `<option value="${c}">${c}</option>`;
-
-        // dropdownga qo'shish
+        // dropdownga qo'shish (mavjud kategoriya)
         const li = document.createElement("li");
         li.textContent = c;
         li.onclick = () => {
@@ -75,6 +88,16 @@ function renderCategories() {
         };
         categoryList.appendChild(li);
     });
+
+    // oxirida: Kategoriya qo'shish
+    const addLi = document.createElement('li');
+    addLi.textContent = "Kategoriya qo'shish";
+    addLi.className = 'add-category-option';
+    addLi.onclick = () => {
+        newCategoryName.value = '';
+        categoryModal.style.display = 'flex';
+    };
+    categoryList.appendChild(addLi);
 }
 
 // ======= RENDER CART =======
@@ -86,9 +109,17 @@ function renderCart() {
         const div = document.createElement("div");
         div.className = "cartItem";
         div.innerHTML = `
-            <span>${p.name} (${p.category}) - ${p.quantity} ta - $${p.price}</span>
-            <button onclick="updateCart(${p.id}, 'remove')">-</button>
-            <button onclick="updateCart(${p.id}, 'add')">+</button>
+            <div class="cart-info">
+                <span class="cart-name">${p.name}</span>
+                <span class="cart-sep"></span>
+                ${p.info ? `<span class="cart-desc">${p.info}</span><span class="cart-sep"></span>` : ``}
+                <span class="cart-price">$${p.price}</span>
+            </div>
+            <div class="cart-controls">
+                <button class="btn-minus" onclick="updateCart(${p.id}, 'remove')">-</button>
+                <span class="cart-qty">${p.quantity}</span>
+                <button class="btn-plus" onclick="updateCart(${p.id}, 'add')">+</button>
+            </div>
         `;
         cartItems.appendChild(div);
     });
@@ -132,33 +163,84 @@ orderBtn.addEventListener("click", async () => {
 
 // ======= UPDATE CART =======
 async function updateCart(id, action) {
-    await fetch("/api/cart", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ id, action })
-    });
-    fetchProducts();
+    // Optimistic UI update: immediately reflect changes without full page refresh
+    const p = products.find(x => x.id === id);
+    if (p) {
+        const delta = action === 'add' ? 1 : -1;
+        p.quantity = Math.max(0, (p.quantity || 0) + delta);
+        // Update cart panel and, if open, detail view
+        renderCart();
+        if (selectedProductId === id) {
+            renderDetailView();
+        }
+    }
+
+    // Sync with server in background
+    try {
+        const res = await fetch("/api/cart", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, action })
+        });
+        if (!res.ok) {
+            // Revert optimistic change on error
+            if (p) {
+                const delta = action === 'add' ? -1 : 1;
+                p.quantity = Math.max(0, (p.quantity || 0) + delta);
+                renderCart();
+                if (selectedProductId === id) {
+                    renderDetailView();
+                }
+            }
+        } else {
+            // Optionally reconcile with server's authoritative value
+            const serverProduct = await res.json();
+            if (p && typeof serverProduct.quantity === 'number') {
+                p.quantity = serverProduct.quantity;
+                renderCart();
+                if (selectedProductId === id) {
+                    renderDetailView();
+                }
+            }
+        }
+    } catch (e) {
+        // Network error: revert optimistic change
+        if (p) {
+            const delta = action === 'add' ? -1 : 1;
+            p.quantity = Math.max(0, (p.quantity || 0) + delta);
+            renderCart();
+            if (selectedProductId === id) {
+                renderDetailView();
+            }
+        }
+    }
 }
 
 // ======= ADD NEW PRODUCT =======
 addBtn.addEventListener("click", async () => {
-    if (!newName.value || !newPrice.value || !newCategoryInput.value) {
-        return alert("Mahsulot nomi, narxi va kategoriyasi to‘ldirilishi kerak!");
+    if (!newName.value || !newPrice.value || !newCategoryInput.value || !newImageFile.files || newImageFile.files.length === 0) {
+        return alert("Mahsulot nomi, narxi, kategoriya va rasm majburiy!");
     }
-    const newProduct = {
-        name: newName.value,
-        price: Number(newPrice.value),
-        category: newCategoryInput.value,
-        info: newInfo.value
-    };
-    await fetch("/api/products", {
+
+    const formData = new FormData();
+    formData.append('name', newName.value);
+    formData.append('price', String(Number(newPrice.value)));
+    formData.append('category', newCategoryInput.value);
+    formData.append('info', newInfo.value);
+    formData.append('image', newImageFile.files[0]);
+
+    const res = await fetch("/api/products", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(newProduct)
+        body: formData
     });
+    const data = await res.json();
+    if (!res.ok) {
+        return alert(data.message || 'Xatolik yuz berdi');
+    }
     newName.value = "";
     newPrice.value = "";
     newInfo.value = "";
+    newImageFile.value = "";
     newCategoryInput.value = "";
     fetchProducts();
 });
@@ -182,17 +264,12 @@ newCategoryInput.addEventListener("click", () => {
 
 document.addEventListener("click", e => {
     if (!newCategoryInput.contains(e.target) &&
-        !categoryList.contains(e.target) &&
-        e.target !== addCategoryBtn) {
+        !categoryList.contains(e.target)) {
         categoryList.style.display = "none";
     }
 });
 
 // ======= CATEGORY MODAL =======
-addCategoryBtn.addEventListener("click", () => {
-    newCategoryName.value = "";
-    categoryModal.style.display = "flex";
-});
 
 saveCategoryBtn.addEventListener("click", () => {
     const cat = newCategoryName.value.trim();
@@ -208,6 +285,93 @@ saveCategoryBtn.addEventListener("click", () => {
 cancelCategoryBtn.addEventListener("click", () => {
     categoryModal.style.display = "none";
 });
+
+// ======= PRODUCT MODAL =======
+function openProductDetails(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    pmImage.src = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
+    pmName.textContent = p.name;
+    pmInfo.textContent = p.info || '';
+    pmPrice.textContent = `Narxi: $${p.price}`;
+    pmCategory.textContent = `Kategoriya: ${p.category}`;
+    productModal.style.display = 'flex';
+}
+
+pmClose.addEventListener('click', () => {
+    productModal.style.display = 'none';
+});
+
+productModal.addEventListener('click', (e) => {
+    if (e.target === productModal) {
+        productModal.style.display = 'none';
+    }
+});
+
+// ======= FULLSCREEN DETAIL VIEW =======
+const detailView = document.getElementById('detailView');
+const dvBack = document.getElementById('dvBack');
+const dvHero = document.getElementById('dvHero');
+const dvList = document.getElementById('dvList');
+let selectedProductId = null;
+
+function openProductWindow(id) {
+    selectedProductId = id;
+    renderDetailView();
+    detailView.style.display = 'block';
+    // always start at top when opening
+    detailView.scrollTo({ top: 0, behavior: 'instant' in document ? 'instant' : 'auto' });
+}
+
+function closeProductWindow() {
+    detailView.style.display = 'none';
+    selectedProductId = null;
+}
+
+dvBack.addEventListener('click', () => {
+    closeProductWindow();
+});
+
+function renderDetailView() {
+    const p = products.find(x => x.id === selectedProductId);
+    if (!p) return;
+    // Hero section (full first screen)
+    dvHero.innerHTML = `
+        <img src="${p.image || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="${p.name}" />
+        <h2 style="margin:10px 0 6px 0;">${p.name}</h2>
+        <div class="price">$${p.price}</div>
+        <div style="opacity:0.8;">${p.category}</div>
+        <p style="text-align:center;">${p.info || ''}</p>
+        <div class="detail-actions">
+            <button onclick="updateCart(${p.id}, 'remove')">-</button>
+            <span>${p.quantity}</span>
+            <button onclick="updateCart(${p.id}, 'add')">+</button>
+        </div>
+    `;
+
+    // Remaining products list
+    dvList.innerHTML = '';
+    products.filter(x => x.id !== p.id).forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'detail-item';
+        row.innerHTML = `
+            <img src="${item.image || 'https://via.placeholder.com/100?text=No+Image'}" alt="${item.name}">
+            <div style="flex:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span style="font-weight:600;">${item.name}</span>
+                <span style="font-size:12px;opacity:0.8;">$${item.price}</span>
+                <span style="font-size:12px;opacity:0.8;">${item.category}</span>
+                <span style="font-size:12px;opacity:0.8;">${item.info || ''}</span>
+            </div>
+        `;
+        row.addEventListener('click', () => {
+            // promote this item to primary
+            selectedProductId = item.id;
+            renderDetailView();
+            detailView.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        dvList.appendChild(row);
+    });
+}
 
 // ======= INIT =======
 fetchProducts();

@@ -50,7 +50,79 @@ header .title {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.product, .cartItem {
+/* style list container overrides */
+#productList {
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* like product card */
+.product {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    transition: box-shadow 0.15s ease, transform 0.05s ease;
+}
+.product:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+
+/* Thumbnail */
+.product .thumb {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex: 0 0 auto;
+}
+
+/* Content */
+.product .content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0; /* enable text truncation */
+}
+
+.pi-name {
+    color: #002f34;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pi-price {
+    color: #002f34;
+    font-weight: 700;
+    font-size: 18px;
+}
+.pi-cat, .pi-info {
+    color: #6f787b;
+    font-size: 12px;
+}
+
+/* Trailing arrow */
+.product .arrow {
+    color: #99a0a3;
+    font-size: 22px;
+    align-self: center;
+}
+
+@media (max-width: 480px) {
+    .product { gap: 10px; padding: 10px; }
+    .product .thumb { width: 80px; height: 80px; }
+    .pi-name { font-size: 15px; }
+    .pi-price { font-size: 16px; }
+}
+
+.cartItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -80,8 +152,10 @@ input, select {
 #addProduct {
     display: flex;
     gap: 10px;
+    margin-top: 0.8rem;
     align-items: center;
-    flex-wrap: wrap; /* kichik ekranlar uchun qatorni uzatadi */
+    flex-wrap: wrap; /* elementlar sig'ishicha qator almashtiradi */
+    overflow-x: visible; /* gorizontal skroll bo'lmasin */
 }
 
 #addProduct input,
@@ -122,12 +196,25 @@ input, select {
 }
 
 .category-list li {
-    padding: 8px 10px;
+    padding: 10px 12px;
     cursor: pointer;
+    border-bottom: 1px solid #eaeaea; /* gorizontal ajratuvchi chiziq */
 }
-
+.category-list li:last-child {
+    /* oxirgi element (qo'shish tugmasi) ham ajratilgan, lekin pastdan chiziqsiz qoldiramiz */
+    border-bottom: none;
+}
 .category-list li:hover {
-    background-color: #f0f0f0;
+    background-color: #f5f5f5;
+}
+/* maxsus: Kategoriya qo'shish varianti */
+.category-list li.add-category-option {
+    background: #4CAF50; /* yashil fon */
+    color: #ffffff;
+    font-weight: 600;
+}
+.category-list li.add-category-option:hover {
+    background: #1b5e20;
 }
 
 /* Modal */
@@ -156,4 +243,186 @@ input, select {
     width: 80%;
     padding: 8px;
     margin-bottom: 10px;
+}
+
+/* Full-screen detail view */
+#detailView.detail-view {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    overflow-y: auto;
+}
+.detail-header {
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    z-index: 1;
+}
+.detail-hero {
+    position: relative;
+    padding: 16px;
+    padding-bottom: 96px; /* action tugmalar uchun joy qoldirish */
+    min-height: 50vh; /* birinchi ekran to'liq mahsulot tafsilotlari */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(8px, 2.5vw, 16px);
+    /* Scale all hero content based on width */
+    font-size: clamp(16px, 4vw, 22px);
+}
+.detail-hero img {
+    width: 100%;
+    max-width: min(92vw, 720px);
+    height: auto;
+    border-radius: 12px;
+}
+.detail-hero .price {
+    font-size: clamp(18px, 5vw, 28px);
+    font-weight: bold;
+}
+.detail-list {
+    padding: 10px 16px 30px 16px;
+}
+.detail-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+.detail-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Responsive scaling for hero typography and controls */
+.detail-hero h2 {
+    font-size: clamp(20px, 6vw, 34px);
+    margin: 10px 0 6px 0; /* preserve intended spacing */
+}
+.detail-hero p {
+    font-size: clamp(14px, 3.5vw, 18px);
+}
+.detail-actions button {
+    font-size: clamp(14px, 3.5vw, 20px);
+    padding: clamp(6px, 1.2vw, 10px) clamp(10px, 2vw, 16px);
+}
+.detail-actions span {
+    font-size: clamp(14px, 3.5vw, 20px);
+}
+/* Horizontal info row for product list */
+.product-info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Show +/- only on hero at bottom-right */
+.detail-hero .detail-actions {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 8px 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Ensure list items in detail view don't show controls (safety) */
+.detail-list .detail-actions { display: none; }
+
+/* ==== File input styling: make Choose File fill width and remove extra space ==== */
+#newImageFile {
+    flex: 0 0 auto; /* bitta qatorda joylashish uchun */
+    width: auto;
+    padding: 0; /* remove inner padding that may cause extra gaps */
+    font-size: 0; /* hide filename text area; we will style the button text */
+    border: none; /* remove outer border */
+    outline: none; /* remove focus outline */
+    background: transparent; /* no background so only button is visible */
+    box-shadow: none; /* remove any default shadows */
+}
+
+/* Standard selector for modern browsers */
+#newImageFile::file-selector-button {
+    width: auto;
+    font-size: 14px; /* restore readable text */
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+/* WebKit fallback (older Chrome/Safari) */
+#newImageFile::-webkit-file-upload-button {
+    width: 100%;
+    font-size: 14px;
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5.5px;
+    cursor: pointer;
+}
+
+
+/* Cart layout enhancements */
+.cartItem { gap: 10px; padding: 6px 0; }
+.cart-info { display: flex; align-items: baseline; gap: 8px; }
+.cart-name { font-weight: 600; color: #002f34; }
+.cart-price { font-size: 12px; color: #6f787b; }
+.cart-controls { display: flex; align-items: center; gap: 8px; }
+.cart-controls .btn-minus,
+.cart-controls .btn-plus { width: 32px; height: 32px; padding: 0; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; }
+.cart-controls .cart-qty { min-width: 24px; text-align: center; font-weight: 600; }
+
+
+/* Cart info separators and description */
+.cart-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cart-desc { font-size: 12px; color: #556368; opacity: 0.95; }
+.cart-info .cart-sep { flex: 0 0 20px; width: 20px; height: 1px; background: #dcdfe1; align-self: center; }
+
+/* Make sure price stays readable but subtle */
+.cart-price { white-space: nowrap; }
+
+
+/* Cart list: one-row items with separators between products */
+#cartItems { display: flex; flex-direction: column; }
+.cartItem { flex-wrap: nowrap; border-bottom: 1px solid #e5e5e5; }
+#cartItems .cartItem:last-child { border-bottom: none; }
+
+/* Ensure text stays on one line and truncates if long */
+.cart-info { flex: 1; min-width: 0; flex-wrap: nowrap; }
+.cart-name, .cart-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+/* Match 'Qo'shish' button size with Choose File */
+#addBtn {
+    flex: 0 0 auto; /* same intrinsic width behavior as file button */
+    padding: 6px 12px; /* match ::file-selector-button padding */
+    font-size: 14px; /* match text size */
+    border-radius: 6px; /* match rounded corners */
 }

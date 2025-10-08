@@ -7,11 +7,34 @@ const { products, categories } = require("./db");
 const { sendToTelegram } = require('./telegramBot');
 const { getChatId, setMapping, readAll } = require('./tokenStore');
 const { randomUUID } = require('crypto');
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer storage setup
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname) || '.jpg';
+        cb(null, unique + ext);
+    }
+});
+const upload = multer({ storage });
+
 app.use(express.json());
+
+// Serve uploaded images
+app.use('/uploads', express.static(uploadsDir));
 
 // Frontend papkasi
 app.use(express.static(path.join(__dirname, "../frontend")));
@@ -21,17 +44,18 @@ app.get("/api/products", (req, res) => {
     res.json({ products, categories });
 });
 
-// Yangi mahsulot qo'shish
-app.post("/api/products", (req, res) => {
+// Yangi mahsulot qo'shish (faqat galereyadan rasm qabul qilinadi)
+app.post("/api/products", upload.single('image'), (req, res) => {
     const { name, price, category, info } = req.body;
-    if (!name || !price || !category)
-        return res.status(400).json({ message: "Nom, narx va kategoriya majburiy!" });
+    if (!name || !price || !category || !req.file)
+        return res.status(400).json({ message: "Nom, narx, kategoriya va rasm majburiy!" });
 
     const id = products.length ? products[products.length - 1].id + 1 : 1;
 
     if (!categories.includes(category)) categories.push(category);
 
-    const newProduct = { id, name, price, category, info: info || "", quantity: 0 };
+    const image = `/uploads/${req.file.filename}`;
+    const newProduct = { id, name, price: Number(price), category, info: info || "", quantity: 0, image };
     products.push(newProduct);
 
     res.status(201).json(newProduct);

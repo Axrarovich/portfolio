@@ -14,7 +14,7 @@
 
 <main>
     <section id="search">
-        <input type="text" id="searchInput" placeholder="Mahsulot qidirish...">
+        <input type="text" id="searchInput" placeholder="Mahsulotlarni qidirish...">
         <select id="categoryFilter">
             <option value="">Barchasi</option>
         </select>
@@ -31,14 +31,14 @@
     <section id="addProduct">
         <h2>Yangi mahsulot qo'shish</h2>
         <input type="text" id="newName" placeholder="Mahsulot nomi">
-        <input type="number" id="newPrice" placeholder="Narxi">
+        <input type="number" id="newPrice" placeholder="Mahsulot narxi">
 
         <div class="category-wrapper">
             <input type="text" id="newCategory" placeholder="Kategoriya tanlash" readonly>
-            <button id="addCategoryBtn">+</button>
             <ul id="categoryList" class="category-list"></ul>
         </div>
 
+        <input type="file" id="newImageFile" accept="image/*" capture="environment">
         <input type="text" id="newInfo" placeholder="Mahsulot haqida">
         <button id="addBtn">Qo'shish</button>
     </section>
@@ -47,7 +47,7 @@
         <a id="connectTelegram" class="btn" target="_blank">Telegram bilan bog'lash</a>
     </section>
 
-    <!-- Modal -->
+    <!-- Modal: Kategoriya -->
     <div id="categoryModal" class="modal">
         <div class="modal-content">
             <h3>Yangi kategoriya qo'shish</h3>
@@ -59,8 +59,30 @@
         </div>
     </div>
 
-</main>
+    <!-- Modal: Mahsulot tafsilotlari -->
+    <div id="productModal" class="modal">
+        <div class="modal-content" id="productModalContent">
+            <img id="pmImage" alt="Mahsulot rasmi" style="max-width:100%; border-radius:8px; margin-bottom:10px;" />
+            <h3 id="pmName"></h3>
+            <p id="pmInfo"></p>
+            <p id="pmPrice"></p>
+            <p id="pmCategory"></p>
+            <button id="pmClose">Yopish</button>
+        </div>
+    </div>
 
-<script src="scripts/app.js"></script>
+    <!-- Full-screen Detail View -->
+    <div id="detailView" class="detail-view">
+        <div class="detail-header">
+            <button id="dvBack">Orqaga</button>
+            <h3 id="dvTitle" style="margin:0;">Mahsulotlar</h3>
+        </div>
+        <div id="dvHero" class="detail-hero"></div>
+        <div id="dvList" class="detail-list"></div>
+    </div>
+
+ </main>
+ 
+ <script src="scripts/app.js"></script>
 </body>
 </html>
