@@ -12,28 +12,6 @@
         "image": "logo/mobis_logo.jpg"
       },
       {
-              "id": 1,
-              "name": "Stol",
-              "price": 350000,
-              "category": "Mebel",
-              "info": "Yog'ochdan tayyorlangan stol, 120x60 sm.",
-              "image": "logo/mobis_logo.jpg"
-            },{
-                      "id": 1,
-                      "name": "Stol",
-                      "price": 350000,
-                      "category": "Mebel",
-                      "info": "Yog'ochdan tayyorlangan stol, 120x60 sm.",
-                      "image": "logo/mobis_logo.jpg"
-                    },{
-                              "id": 1,
-                              "name": "Stol",
-                              "price": 350000,
-                              "category": "Mebel",
-                              "info": "Yog'ochdan tayyorlangan stol, 120x60 sm.",
-                              "image": "logo/mobis_logo.jpg"
-                            },
-      {
         "id": 2,
         "name": "Kreslo",
         "price": 280000,
