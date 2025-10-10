@@ -1,88 +1,58 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniApp - Mahsulotlar</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mobis - Mahsulotlar</title>
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
 <header>
-    <h1>Mobis</h1>
-    <img src="logo/mobis_logo.jpg" alt="Logo" class="logo">
-</header>
-
-<main>
-    <section id="search">
-        <input type="text" id="searchInput" placeholder="Mahsulotlarni qidirish...">
+    <div class="header-top">
+        <img src="logo/mobis_logo.jpg" alt="Mobis logo" class="logo">
+        <div class="title">Mobis</div>
+        <div class="cart-wrapper">
+            <button id="cartBtn" aria-label="Savat">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="20" r="1.5" fill="#fff"/>
+                    <circle cx="18" cy="20" r="1.5" fill="#fff"/>
+                </svg>
+                <span id="cartBadge">0</span>
+            </button>
+        </div>
+    </div>
+    <div class="header-bottom">
+        <input id="searchInput" type="text" placeholder="Mahsulotlarni qidirish...">
         <select id="categoryFilter">
             <option value="">Barchasi</option>
         </select>
+    </div>
+</header>
+
+<main>
+    <!-- Mahsulotlar bo'limi (Savat bo'limining YOQARISIDA) -->
+    <section id="productSection">
+        <h2 style="margin: 16px 0 8px 8px;">Mahsulotlar</h2>
+        <div id="productList" style="padding: 0 12px 24px 12px; display:flex; flex-wrap:wrap; gap:12px;"></div>
     </section>
+</main>
 
-    <section id="productList"></section>
-
-    <section id="cart">
-        <h2>Savat</h2>
-        <div id="cartItems"></div>
-        <button id="orderBtn" style="display:none;">Buyurtma berish</button>
-    </section>
-
-    <section id="addProduct">
-        <h2>Yangi mahsulot qo'shish</h2>
-        <input type="text" id="newName" placeholder="Mahsulot nomi">
-        <input type="number" id="newPrice" placeholder="Mahsulot narxi">
-
-        <div class="category-wrapper">
-            <input type="text" id="newCategory" placeholder="Kategoriya tanlash" readonly>
-            <ul id="categoryList" class="category-list"></ul>
-        </div>
-
-        <input type="file" id="newImageFile" accept="image/*" capture="environment">
-        <input type="text" id="newInfo" placeholder="Mahsulot haqida">
-        <button id="addBtn">Qo'shish</button>
-    </section>
-
-    <section id="connectTelegramSection">
-        <a id="connectTelegram" class="btn" target="_blank">Telegram bilan bog'lash</a>
-    </section>
-
-    <!-- Modal: Kategoriya -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <h3>Yangi kategoriya qo'shish</h3>
-            <input type="text" id="newCategoryName" placeholder="Kategoriya nomi">
+<!-- Savat modal (alohida oyna) -->
+<div id="cartModal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:520px; width:92%;">
+        <h3 style="margin-top:0;">Savat</h3>
+        <div id="cartItems" style="max-height:60vh; overflow:auto; margin-bottom:12px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <div><strong>Jami:</strong> <span id="cartTotal">0</span> so‘m</div>
             <div>
-                <button id="saveCategoryBtn">Saqlash</button>
-                <button id="cancelCategoryBtn">Bekor qilish</button>
+                <button id="closeCart" style="margin-right:8px;">Yopish</button>
+                <button id="checkoutBtn">Buyurtma berish</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal: Mahsulot tafsilotlari -->
-    <div id="productModal" class="modal">
-        <div class="modal-content" id="productModalContent">
-            <img id="pmImage" alt="Mahsulot rasmi" style="max-width:100%; border-radius:8px; margin-bottom:10px;" />
-            <h3 id="pmName"></h3>
-            <p id="pmInfo"></p>
-            <p id="pmPrice"></p>
-            <p id="pmCategory"></p>
-            <button id="pmClose">Yopish</button>
-        </div>
-    </div>
-
-    <!-- Full-screen Detail View -->
-    <div id="detailView" class="detail-view">
-        <div class="detail-header">
-            <button id="dvBack">Orqaga</button>
-            <h3 id="dvTitle" style="margin:0;">Mahsulotlar</h3>
-        </div>
-        <div id="dvHero" class="detail-hero"></div>
-        <div id="dvList" class="detail-list"></div>
-    </div>
-
- </main>
- 
- <script src="scripts/app.js"></script>
+<script src="scripts/app.js"></script>
 </body>
 </html>
